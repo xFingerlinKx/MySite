@@ -6,6 +6,8 @@ from .forms import *
 """Verify that the current user is authenticated."""
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.core.paginator import Paginator
+
 
 # Class Based Views (CBVs) и использование Миксинов
 class PostDetail(ObjectDetailMixin, View):
@@ -35,7 +37,31 @@ class PostDelete(LoginRequiredMixin, ObjectDeleteMixin, View):
 
 def posts_list(request):
     posts = Post.objects.all()
-    return render(request, 'blog/index.html', context={'posts': posts})
+    paginator = Paginator(posts, 2)  # отображение списка постов (два поста) на странице
+
+    page_number = request.GET.get('page', 1)
+    page = paginator.get_page(page_number)
+
+    is_paginated = page.has_other_pages()  # переменная, определяющая, имеются ли другие страницы кроме текущей
+
+    if page.has_previous():
+        prev_url = '?page={}'.format(page.previous_page_number())
+    else:
+        prev_url = ''
+
+    if page.has_next():
+        next_url = '?page={}'.format(page.next_page_number())
+    else:
+        next_url = ''
+
+    context = {
+        'page_object': page,
+        'is_paginated': is_paginated,
+        'next_page_url': next_url,
+        'prev_page_url': prev_url
+    }
+
+    return render(request, 'blog/index.html', context=context)
 
 
 # Class Based Views (CBVs) и использование Миксинов
