@@ -55,12 +55,13 @@
         </div>
     </div>
 
-    <div class="admin-panel align-items-center btn btn-secondary btn-lg">
-        <a class="btn btn-light" href="/admin/">Admin</a>
+    <!--разграничение доступа к элементам меню (авторизованный или нет)-->
+    {% if request.user.is_authenticated and request.user.is_staff %}
+        <div class="admin-panel align-items-center btn btn-secondary btn-lg">
+            <a class="btn btn-light" href="/admin/">Admin</a>
             {% block admin-panel %}{% endblock %}
-    </div>
-
-
+        </div>
+    {% endif %}
 
 
 </body>
