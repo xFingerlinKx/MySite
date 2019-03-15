@@ -8,6 +8,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.core.paginator import Paginator
 
+from django.db.models import Q
+"""Encapsulate filters as objects that can then be combined logically (using `&` and `|`)
+Для того, чтобы в функции поиска фильтровать поисковые запросы"""
+
 
 # Class Based Views (CBVs) и использование Миксинов
 class PostDetail(ObjectDetailMixin, View):
@@ -36,9 +40,14 @@ class PostDelete(LoginRequiredMixin, ObjectDeleteMixin, View):
 
 
 def posts_list(request):
-    posts = Post.objects.all()
-    paginator = Paginator(posts, 2)  # отображение списка постов (два поста) на странице
+    search_query = request.GET.get('search', '')  # поисковая форма
 
+    if search_query:
+        posts = Post.objects.filter(Q(title__icontains=search_query) | Q(body__icontains=search_query))
+    else:
+        posts = Post.objects.all()
+
+    paginator = Paginator(posts, 4)  # отображение списка постов (два поста) на странице
     page_number = request.GET.get('page', 1)
     page = paginator.get_page(page_number)
 
